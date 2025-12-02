@@ -1,0 +1,437 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Jireh — The Provider of Fresh Goodness</title>
+  <meta name="description" content="Jireh — Freshly baked cakes, donuts & brownies. Order via WhatsApp or Instagram." />
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    :root{
+      --cream: #FFF8F2;
+      --blush: #F9E4E0;
+      --accent: #C68A74;
+      --text: #3b2f2a;
+      --glass: rgba(255,255,255,0.56);
+      --card-dark: #2b1c18; /* chocolate for dark panels */
+      --card-dark-2: #3b2417;
+      --muted: rgba(0,0,0,0.55);
+      --jelly1: #ffdcd2; --jelly2: #fbe9f1; --jelly3: #fff0d9;
+    }
+
+    /* Dark theme overrides (applied on html.dark) */
+    html.dark {
+      --cream: #120a09;
+      --blush: #2a1614;
+      --accent: #b88163;
+      --text: #fff7f2;
+      --glass: rgba(30,20,18,0.45);
+      --muted: rgba(255,255,255,0.85);
+      --jelly1: #3b2320; --jelly2: #3a2230; --jelly3: #3b2417;
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      margin:0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      color: var(--text);
+      background: linear-gradient(180deg, var(--cream) 0%, #fff4ed 60%);
+    }
+
+    /* Loader */
+    #loader {
+      position:fixed; inset:0; z-index:9999;
+      display:flex; align-items:center; justify-content:center;
+      background:linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,250,0.95));
+      transition: opacity .35s ease, visibility .35s;
+    }
+    #loader.hidden { opacity:0; visibility:hidden; pointer-events:none; }
+    .loader-inner { display:flex; flex-direction:column; align-items:center; gap:12px; }
+    .spinner { width:84px; height:84px; border-radius:50%; background:conic-gradient(var(--accent), transparent 40%); filter:blur(6px); animation:spin 1.6s linear infinite; display:flex; align-items:center; justify-content:center; }
+    .logo-mini { width:56px; height:56px; border-radius:12px; overflow:hidden; background:white; display:flex; align-items:center; justify-content:center; box-shadow:0 6px 22px rgba(0,0,0,0.08); }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Sticky header */
+    header.site-header {
+      position:sticky; top:0; z-index:60;
+      backdrop-filter: blur(8px);
+      background: linear-gradient(180deg, rgba(255,255,255,0.62), rgba(255,255,255,0.3));
+      border-bottom:1px solid rgba(0,0,0,0.04);
+    }
+    html.dark header.site-header {
+      background: linear-gradient(180deg, rgba(20,12,10,0.6), rgba(20,12,10,0.45));
+      border-bottom-color: rgba(255,255,255,0.06);
+    }
+    .site-header-inner { max-width:1100px; margin:0 auto; padding:12px 20px; display:flex; align-items:center; justify-content:space-between; gap:12px; }
+
+    .brand-wrap { display:flex; align-items:center; gap:14px; }
+    .logo-large { width:92px; height:92px; border-radius:18px; overflow:hidden; padding:6px; background:var(--glass); display:flex; align-items:center; justify-content:center; box-shadow: 8px 10px 28px rgba(0,0,0,0.08); transition: transform .18s ease; }
+    .logo-large {
+  width: 150px;
+  height: 150px;
+  border-radius: 18px;
+  overflow: hidden;
+  padding: 6px;
+}
+    .logo-large:hover{ transform: translateY(-4px) scale(1.02); }
+
+    .nav-actions a { margin-left:10px; display:inline-flex; align-items:center; gap:8px; padding:8px 14px; border-radius:999px; background:var(--glass); text-decoration:none; color:var(--text); box-shadow:0 6px 20px rgba(0,0,0,0.06); transition:transform .18s ease, box-shadow .18s ease; }
+    html.dark .nav-actions a { background: rgba(255,255,255,0.04); color: var(--text); }
+    .nav-actions a:hover { transform: translateY(-4px); box-shadow:0 18px 40px rgba(0,0,0,0.12); }
+
+    /* Hero */
+    .hero { position:relative; overflow:visible; padding:56px 20px 80px; }
+    .hero-inner { max-width:1100px; margin:0 auto; display:grid; grid-template-columns: 1fr 520px; gap:28px; align-items:center; }
+    @media (max-width:1024px){ .hero-inner { grid-template-columns: 1fr; } }
+
+    .hero-card { padding:36px; border-radius:20px; background:var(--glass); box-shadow: 20px 30px 60px rgba(0,0,0,0.04); transition: transform .24s ease, box-shadow .24s ease; }
+    html.dark .hero-card { background: linear-gradient(180deg, rgba(0,0,0,0.35), rgba(0,0,0,0.2)); color: var(--text); }
+
+    .hero-title { font-weight:900; font-size:40px; line-height:1.02; margin:0; }
+    .hero-sub { margin-top:12px; color: var(--muted); font-size:16px; }
+
+    /* Parallax hero image container - center align vertically */
+    .hero-media { display:flex; align-items:center; justify-content:center; height:100%; }
+    .hero-media .media-frame { border-radius:16px; overflow:hidden; width:520px; max-width:100%; height:420px; box-shadow: 0 18px 48px rgba(0,0,0,0.08); background:white; display:flex; align-items:center; justify-content:center; }
+    .hero-media img { width:100%; height:100%; object-fit:cover; display:block; }
+
+    /* Parallax transform layer */
+    .parallax-layer { transition: transform .12s linear; will-change: transform; }
+
+    
+    
+    /* Gallery */
+    .gallery { margin-top:28px; display:grid; grid-template-columns: repeat(4, 1fr); gap:18px; }
+    @media (max-width:1024px){ .gallery { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width:640px){ .gallery { grid-template-columns: 1fr; } }
+
+    .card { border-radius:14px; overflow:hidden; background:var(--glass); box-shadow:0 12px 30px rgba(0,0,0,0.06); transition: transform .22s cubic-bezier(.2,.9,.3,1), box-shadow .22s; cursor:pointer; position:relative; }
+    html.dark .card { background: linear-gradient(180deg, rgba(0,0,0,0.38), rgba(0,0,0,0.25)); color:var(--text); }
+    .card img { width:100%; height:260px; object-fit:cover; display:block; transition: transform .28s ease; }
+    .card .meta{ padding:14px; }
+    .card h4{ font-size:18px; margin:0; font-weight:800; }
+    .card p{ margin:8px 0 0; color:var(--muted); }
+    .card:hover, .card:focus { transform:translateY(-12px) scale(1.02); box-shadow:0 34px 90px rgba(0,0,0,0.16); z-index:22; }
+
+    /* Tall variant for bigger images */
+    .tall { height:320px !important; }
+
+    /* Panels (about, contact, form) */
+    .panel { padding:20px; border-radius:12px; background:var(--glass); box-shadow:0 12px 30px rgba(0,0,0,0.06); transition: transform .22s ease, box-shadow .22s; }
+    html.dark .panel { background: linear-gradient(180deg, var(--card-dark), var(--card-dark-2)); color: #fff; }
+    .panel:hover { transform:translateY(-10px) scale(1.02); box-shadow:0 32px 70px rgba(0,0,0,0.18); }
+
+    /* Lightbox */
+    #lightbox { position:fixed; inset:0; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,0.6); z-index:80; padding:24px; }
+    #lightbox.show { display:flex; }
+    #lightbox img { max-width:92vw; max-height:88vh; border-radius:12px; box-shadow:0 18px 60px rgba(0,0,0,0.6); }
+
+    /* Reveal animation utility */
+    .reveal { opacity:0; transform: translateY(10px); transition: all .6s cubic-bezier(.2,.9,.3,1); }
+    .reveal.in { opacity:1; transform:none; }
+
+    /* Dark-toggle */
+    .toggle { width:52px; height:30px; background:var(--glass); border-radius:999px; display:inline-flex; align-items:center; padding:4px; cursor:pointer; }
+    .toggle .knob { width:22px; height:22px; background:white; border-radius:50%; transition: transform .25s ease; }
+    html.dark .toggle { background: rgba(255,255,255,0.04); }
+    html.dark .toggle .knob { transform: translateX(22px); background:#2f110f; }
+
+    /* Increased base text sizes for readability */
+    h1, .hero-title { font-size: clamp(28px, 4.5vw, 44px); }
+    .hero-sub { font-size: clamp(14px, 1.8vw, 18px); }
+    .card h4 { font-size: clamp(16px, 2.2vw, 20px); }
+
+    /* small screens adjustments */
+    @media (max-width:640px) {
+      .logo-large { width:72px; height:72px; }
+      .hero-card { padding:20px; }
+      .hero-media .media-frame { height:320px; }
+      .card img { height:220px; }
+      .hero-title { font-size:28px; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Loader -->
+  <div id="loader" role="status" aria-live="polite">
+    <div class="loader-inner">
+      <div class="spinner" aria-hidden="true">
+        <div class="logo-mini">
+        <img src="logo.jpg" alt="Jireh logo"></div>
+      </div>
+      <div style="text-align:center">
+        <div style="font-weight:700; font-size:16px;">Jireh — Fresh Goodness</div>
+        <div style="font-size:12px; color:var(--muted)">Loading the bakery…</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- decorative blobs -->
+  <div class="blob b1"></div>
+  <div class="blob b2"></div>
+  <div class="blob b3"></div>
+
+
+
+  <!-- Header -->
+  <header class="site-header" role="banner">
+    <div class="site-header-inner">
+      <div class="brand-wrap">
+        <a href="assets/logo.jpg" class="logo-large" aria-label="Jireh home">
+          <img src="assets/logo.jpg" alt="Jireh logo">
+        </a>
+        <div>
+          <div style="font-weight:800; font-size:18px;">Jireh</div>
+          <div style="font-size:13px; color:var(--muted)">The Provider of Fresh Goodness</div>
+        </div>
+      </div>
+
+      <div style="display:flex; align-items:center; gap:12px;">
+        <div class="nav-actions" role="navigation" aria-label="social links">
+          <a id="whatsapp-link" href="#" target="_blank">📱 WhatsApp</a>
+          <a id="instagram-link" href="#" target="_blank">📸 Instagram</a>
+        </div>
+
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:12px; color:var(--muted)">Dark</span>
+          <button id="dark-toggle" class="toggle" aria-pressed="false" aria-label="Toggle dark mode"><div class="knob"></div></button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero" id="top" aria-labelledby="hero-heading">
+    <div class="hero-inner">
+      <div class="hero-card reveal" id="hero-text">
+        <h1 id="hero-heading" class="hero-title">Freshly baked happiness — cakes, donuts & brownies.</h1>
+        <p class="hero-sub">Made to order, decorated with love. Browse the gallery and message us on WhatsApp to order.</p>
+
+        <div style="margin-top:18px; display:flex; gap:12px; flex-wrap:wrap;">
+          <a id="whatsapp-cta" href="#" style="background:var(--accent); color:#fff; padding:12px 18px; border-radius:999px; text-decoration:none; font-weight:700; box-shadow:0 10px 30px rgba(198,138,116,0.12);">Order on WhatsApp</a>
+          <a href="#gallery" style="background:var(--glass); color:var(--text); padding:12px 18px; border-radius:999px; text-decoration:none; font-weight:700;">See our treats</a>
+        </div>
+
+        <dl style="display:flex; gap:24px; margin-top:18px; color:var(--muted); font-size:14px;">
+          <div><dt style="font-weight:800;">Delivery area</dt><dd>Local only — customise per order</dd></div>
+          <div><dt style="font-weight:800;">Custom cakes</dt><dd>Birthday & celebration designs available</dd></div>
+        </dl>
+      </div>
+
+      <!-- hero image aligned center vertically via flex -->
+      <div class="hero-media" aria-hidden="false">
+        <div class="parallax-layer" id="parallax-hero">
+          <div class="media-frame" role="img" aria-label="Hero product">
+            <img src="brownie.jpg" alt="Best seller" />
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MAIN CONTENT -->
+  <main class="max-w-[1100px] mx-auto px-6 pb-20">
+
+    <!-- About -->
+    <section class="reveal" style="margin-top:16px;">
+      <div class="panel">
+        <h3 style="font-size:20px; font-weight:800; margin:0;">About Jireh</h3>
+        <p style="margin-top:8px; color:var(--muted); font-size:15px;">Jireh started from a passion for baking — turning fresh, quality ingredients into treats that make every small moment special. We make custom cakes, donuts and brownies fresh for every order.</p>
+      </div>
+    </section>
+
+    <!-- Gallery -->
+    <section id="gallery" class="reveal" style="margin-top:22px;">
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+        <h3 style="font-size:20px; font-weight:800; margin:0;">Our Treats</h3>
+        <p style="font-size:13px; color:var(--muted)">Click a photo to view larger.</p>
+      </div>
+
+      <div class="gallery" role="list">
+        <!-- Card 1 -->
+        <article class="card" role="listitem" tabindex="0" data-src="/mnt/data/3ce677b8-92ef-4099-be39-84d885186adf.jpg" onclick="openLightbox(this)" onkeypress="if(event.key==='Enter') openLightbox(this)">
+          <img src="venilla.jpg" alt="Vanilla Plain Cake" class="tall" />
+          <div class="meta">
+            <h4>Vanilla Plain Cake</h4>
+            <p style="color:var(--muted); margin-top:6px;">Soft vanilla sponge with buttercream.</p>
+            <div style="margin-top:8px; font-size:13px; color:var(--muted)">From £25</div>
+          </div>
+        </article>
+
+        <!-- Card 2 -->
+        <article class="card" role="listitem" tabindex="0" data-src="birthdaycake.jpg" onclick="openLightbox(this)" onkeypress="if(event.key==='Enter') openLightbox(this)">
+          <img src="birthdaycake.jpg" alt="Celebration Cake" class="tall" />
+          <div class="meta">
+            <h4>Celebration Cake</h4>
+            <p style="color:var(--muted); margin-top:6px;">Custom designs available.</p>
+            <div style="margin-top:8px; font-size:13px; color:var(--muted)">From £30</div>
+          </div>
+        </article>
+
+        <!-- Card 3 -->
+        <article class="card" role="listitem" tabindex="0" data-src="donut.jpg" onclick="openLightbox(this)" onkeypress="if(event.key==='Enter') openLightbox(this)">
+          <img src="donut.jpg" alt="Classic Donuts" class="tall" />
+          <div class="meta">
+            <h4>Classic Donuts</h4>
+            <p style="color:var(--muted); margin-top:6px;">Glazed & chocolate coated.</p>
+            <div style="margin-top:8px; font-size:13px; color:var(--muted)">Box of 6 — £8</div>
+          </div>
+        </article>
+
+        <!-- Card 4 -->
+        <article class="card" role="listitem" tabindex="0" data-src="brownie.jpg" onclick="openLightbox(this)" onkeypress="if(event.key==='Enter') openLightbox(this)">
+          <img src="brownie.jpg" alt="Fudgy Brownies" class="tall" />
+          <div class="meta">
+            <h4>Fudgy Brownies</h4>
+            <p style="color:var(--muted); margin-top:6px;">Thick, soft & rich.</p>
+            <div style="margin-top:8px; font-size:13px; color:var(--muted)">£12 (tray)</div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- Contact and Form -->
+    <section class="reveal" style="margin-top:28px;">
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:18px;">
+        <div class="panel">
+          <h4 style="font-weight:800; margin:0;">Contact & Orders</h4>
+          <p style="margin-top:8px; color:var(--muted);">Tap below to WhatsApp us directly with your order details (date, item, size, customisations).</p>
+          <div style="margin-top:12px;">
+            <a id="whatsapp-button" href="#" style="padding:10px 14px; border-radius:8px; background:var(--accent); color:#fff; text-decoration:none; font-weight:700;">Message on WhatsApp</a>
+            <a id="instagram-button" href="#" style="padding:10px 14px; border-radius:8px; background:var(--glass); margin-left:8px; text-decoration:none; color:var(--text);">Instagram</a>
+          </div>
+        </div>
+
+        <form class="panel" onsubmit="handleForm(event)">
+          <h4 style="font-weight:800; margin:0;">Send a quick message</h4>
+          <label style="display:block; margin-top:8px; font-size:13px;">Your name
+            <input id="name" required style="width:100%; margin-top:6px; padding:10px; border-radius:8px; border:1px solid rgba(0,0,0,0.06); background:transparent; color:inherit;">
+          </label>
+          <label style="display:block; margin-top:8px; font-size:13px;">Message
+            <textarea id="message" required rows="4" style="width:100%; margin-top:6px; padding:10px; border-radius:8px; border:1px solid rgba(0,0,0,0.06); background:transparent; color:inherit;"></textarea>
+          </label>
+          <label style="display:block; margin-top:8px; font-size:13px;">Phone (WhatsApp)
+            <input id="phone" style="width:100%; margin-top:6px; padding:10px; border-radius:8px; border:1px solid rgba(0,0,0,0.06); background:transparent; color:inherit;" placeholder="+44 7...">
+          </label>
+          <div style="margin-top:12px;">
+            <button type="submit" style="padding:10px 14px; border-radius:10px; background:var(--accent); color:#fff; border:none; cursor:pointer;">Send</button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="max-w-[1100px] mx-auto px-6 pb-20 text-xs" style="color:var(--muted);">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <div>© <span id="year"></span> Jireh — All rights reserved.</div>
+      <div>Designed for local orders • Made with care</div>
+    </div>
+  </footer>
+
+  <!-- Lightbox -->
+  <div id="lightbox" role="dialog" aria-modal="true" onclick="closeLightbox(event)">
+    <img id="lightbox-img" src="" alt="Preview">
+  </div>
+
+  <script>
+    // contact placeholders
+    const WHATSAPP_NUMBER = '+94752556676';
+    const INSTAGRAM_HANDLE = 'jireh_bakery';
+
+    function makeWhatsApp(text='Hi, I would like to order'){
+      const phone = WHATSAPP_NUMBER.replace(/[^0-9+]/g,'');
+      return `https://wa.me/${phone}?text=${encodeURIComponent(text)}`;
+    }
+
+    // wire contact links
+    document.getElementById('whatsapp-link').href = makeWhatsApp('Hello Jireh! I saw your website and would like to order...');
+    document.getElementById('whatsapp-cta').href = makeWhatsApp('Hello Jireh! I saw your website and would like to order...');
+    document.getElementById('whatsapp-button').href = makeWhatsApp('Hello Jireh! I saw your website and would like to order...');
+    document.getElementById('instagram-link').href = 'https://www.instagram.com/' + INSTAGRAM_HANDLE;
+    document.getElementById('instagram-button').href = 'https://www.instagram.com/' + INSTAGRAM_HANDLE;
+
+    // hide loader on load
+    window.addEventListener('load', () => {
+      const loader = document.getElementById('loader');
+      loader.classList.add('hidden');
+      setTimeout(()=> loader.style.display = 'none', 400);
+    });
+
+    // lightbox open/close
+    function openLightbox(el){
+      const src = el.getAttribute('data-src') || el.querySelector('img')?.src;
+      if(!src) return;
+      const lb = document.getElementById('lightbox');
+      const img = document.getElementById('lightbox-img');
+      img.src = src;
+      lb.classList.add('show');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeLightbox(e){
+      if(e.target.id === 'lightbox' || e.key === 'Escape'){
+        const lb = document.getElementById('lightbox');
+        lb.classList.remove('show');
+        document.body.style.overflow = '';
+      }
+    }
+    document.addEventListener('keydown', (ev)=>{ if(ev.key==='Escape') closeLightbox({key:'Escape'}); });
+
+    // parallax hero small translate
+    const parallax = document.getElementById('parallax-hero');
+    window.addEventListener('scroll', ()=>{
+      const sc = window.scrollY;
+      const offset = Math.min(sc * 0.12, 60);
+      parallax.style.transform = `translateY(${offset}px)`;
+    }, {passive:true});
+    (function initParallax(){ const sc = window.scrollY; parallax.style.transform = `translateY(${Math.min(sc * 0.12, 60)}px)`; })();
+
+    // intersection reveal
+    const io = new IntersectionObserver((entries)=>{
+      entries.forEach(ent=>{
+        if(ent.isIntersecting) ent.target.classList.add('in');
+      });
+    }, {threshold:0.12});
+    document.querySelectorAll('.reveal').forEach(el=> io.observe(el));
+
+    // floating cake hover interactions
+    document.querySelectorAll('.float-cake').forEach((el)=>{
+      el.addEventListener('mouseenter', ()=> el.style.transform = 'translateY(-12px) rotate(6deg)');
+      el.addEventListener('mouseleave', ()=> el.style.transform = '');
+    });
+
+    // dark toggle
+    const toggle = document.getElementById('dark-toggle');
+    toggle.addEventListener('click', ()=>{
+      const isDark = document.documentElement.classList.toggle('dark');
+      toggle.setAttribute('aria-pressed', String(isDark));
+      try { localStorage.setItem('jireh-dark', isDark ? '1' : '0'); } catch(e){}
+    });
+    try {
+      const pref = localStorage.getItem('jireh-dark');
+      if(pref === '1'){ document.documentElement.classList.add('dark'); toggle.setAttribute('aria-pressed','true'); }
+    } catch(e){}
+
+    // form -> wa
+    function handleForm(e){
+      e.preventDefault();
+      const name = document.getElementById('name').value.trim();
+      const msg = document.getElementById('message').value.trim();
+      const phone = document.getElementById('phone').value.trim();
+      const text = `Name: ${name}\nMessage: ${msg}\nPhone: ${phone}`;
+      window.open(makeWhatsApp(text), '_blank');
+    }
+
+    // keyboard operability for cards
+    document.querySelectorAll('.card').forEach(card=>{
+      card.addEventListener('keydown', (e)=>{ if(e.key === 'Enter') openLightbox(card); });
+    });
+  </script>
+</body>
+</html>
